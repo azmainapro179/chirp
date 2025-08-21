@@ -1,20 +1,16 @@
-import { Client } from "@planetscale/database";
-import { PrismaPlanetScale } from "@prisma/adapter-planetscale";
 import { PrismaClient } from "@prisma/client";
-
 import { env } from "~/env";
 
-const psClient = new Client({ url: env.DATABASE_URL });
-
+// Create Prisma client
 const createPrismaClient = () =>
   new PrismaClient({
     log:
       env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-    adapter: new PrismaPlanetScale(psClient),
   });
 
+// Prevent multiple instances in development (Next.js hot reload)
 const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
+  prisma: PrismaClient | undefined;
 };
 
 export const db = globalForPrisma.prisma ?? createPrismaClient();
